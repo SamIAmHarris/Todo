@@ -1,5 +1,6 @@
 package com.samiamharris.todo;
 
+import android.content.Intent;
 import android.graphics.Paint;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
@@ -18,10 +19,12 @@ import android.widget.TextView;
 
 import com.parse.FindCallback;
 import com.parse.Parse;
+import com.parse.ParseACL;
 import com.parse.ParseAnalytics;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,11 +73,20 @@ public class Todo extends ActionBarActivity {
         });
 
         updateData();
+
+        ParseUser currentUser = ParseUser.getCurrentUser();
+        if(currentUser == null){
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     public void createTask(View v) {
         if (mTaskInput.getText().length() > 0){
             Task t = new Task();
+            t.setACL(new ParseACL(ParseUser.getCurrentUser()));
+            t.setUser(ParseUser.getCurrentUser());
             t.setDescription(mTaskInput.getText().toString());
             t.setCompleted(false);
             t.saveEventually();
@@ -85,6 +97,7 @@ public class Todo extends ActionBarActivity {
 
     public void updateData() {
         ParseQuery<Task> query = ParseQuery.getQuery(Task.class);
+        query.whereEqualTo("user", ParseUser.getCurrentUser());
         query.setCachePolicy(ParseQuery.CachePolicy.CACHE_THEN_NETWORK);
         query.findInBackground(new FindCallback<Task>() {
             @Override
@@ -110,11 +123,16 @@ public class Todo extends ActionBarActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_logout:
+                ParseUser.logOut();
+                Intent intent = new Intent(this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+                return true;
         }
-        return super.onOptionsItemSelected(item);
+
+        return false;
     }
 
 }

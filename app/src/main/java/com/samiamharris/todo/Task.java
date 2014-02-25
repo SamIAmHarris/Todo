@@ -2,6 +2,7 @@ package com.samiamharris.todo;
 
 import com.parse.ParseClassName;
 import com.parse.ParseObject;
+import com.parse.ParseUser;
 
 /**
  * Created by samharris on 2/22/14.
@@ -11,6 +12,14 @@ import com.parse.ParseObject;
 public class Task extends ParseObject {
 
     public Task(){
+    }
+
+    public ParseUser getUser() {
+        return getParseUser("user");
+    }
+
+    public void setUser(ParseUser user) {
+        put("user", user);
     }
 
     public boolean isCompleted() {
@@ -28,5 +37,7 @@ public class Task extends ParseObject {
     public void setDescription(String description) {
         put("description", description);
     }
+
+
 
 }
